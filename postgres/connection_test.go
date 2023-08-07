@@ -3,7 +3,9 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/url"
 	"os"
@@ -160,10 +162,17 @@ func TestMain(m *testing.M) {
 }
 
 func tearDown() {
+	var pathErr *fs.PathError
+
 	if err := os.Remove("db/schema.sql"); err != nil {
-		panic(err)
+		if !errors.As(err, &pathErr) {
+			panic(err)
+		}
 	}
+
 	if err := os.Remove("db"); err != nil {
-		panic(err)
+		if !errors.As(err, &pathErr) {
+			panic(err)
+		}
 	}
 }
